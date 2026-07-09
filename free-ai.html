@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free AI — ভারতের জন্য বিনামূল্যে এআই</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%230B0D17'/%3E%3Cpath d='M20,7 C16,5.5 11.5,7 10.5,10.5 C7,10.5 5,14 6.5,17 C4,19 4,23 6.5,25 C5.5,28.5 8,31.5 11.5,31 C13,33.5 17,34.5 19.5,32.5 C19.5,33.5 20,34 20,34 C20,34 20.5,33.5 20.5,32.5 C23,34.5 27,33.5 28.5,31 C32,31.5 34.5,28.5 33.5,25 C36,23 36,19 33.5,17 C35,14 33,10.5 29.5,10.5 C28.5,7 24,5.5 20,7 Z' fill='%23E8B34C'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0D17; --panel:#141726; --panel-2:#1B1F33; --line:#262B42;
+    --gold:#E8B34C; --teal:#4FB0A5; --text:#EDEAE3; --muted:#8B8FA3; --danger:#E37B6B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Hind Siliguri',sans-serif; overflow:hidden;
+  }
+  .display{font-family:'Space Grotesk',sans-serif;}
+  .app{display:flex; height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:250px; flex-shrink:0; background:#0E101C; border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:18px 14px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; padding:4px 6px 18px 6px; border-bottom:1px solid var(--line); margin-bottom:14px;}
+  .logo{width:32px; height:32px; flex-shrink:0;}
+  .logo svg{width:100%; height:100%; display:block;}
+  .logo .ring{transform-origin:50% 50%;}
+  .logo.spin .ring{animation:spin 1.6s linear infinite;}
+  .logo.spin .node{animation:pulse 1s ease-in-out infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .brand-name{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px;}
+  .brand-name span{color:var(--gold);}
+  .brand-tag{font-size:10.5px; color:var(--muted); margin-top:1px;}
+
+  .newchat{
+    display:flex; align-items:center; gap:8px; padding:10px 12px; margin-bottom:14px;
+    border:1px solid var(--line); border-radius:10px; color:var(--text); font-size:13.5px;
+    cursor:pointer; background:var(--panel);
+  }
+  .newchat:hover{border-color:var(--gold);}
+
+  .section-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:6px 8px 8px 8px;}
+  .modes{display:flex; flex-direction:column; gap:3px; overflow-y:auto;}
+  .mode{
+    display:flex; gap:10px; align-items:flex-start; padding:9px 10px; border-radius:9px;
+    cursor:pointer; font-size:13px; color:var(--muted); border:1px solid transparent;
+  }
+  .mode:hover{background:var(--panel); color:var(--text);}
+  .mode.active{background:linear-gradient(90deg, rgba(232,179,76,0.14), rgba(232,179,76,0.02)); color:var(--text); border-color:rgba(232,179,76,0.35);}
+  .mode .icon{font-size:16px; line-height:1.3; flex-shrink:0;}
+  .mode .txt b{display:block; font-size:13px;}
+  .mode .txt small{display:block; font-size:11px; color:var(--muted); line-height:1.3; margin-top:1px;}
+
+  .india-note{
+    margin-top:auto; padding:10px 12px; font-size:11px; color:var(--teal);
+    background:rgba(79,176,165,0.08); border:1px solid rgba(79,176,165,0.25); border-radius:9px; line-height:1.5;
+  }
+
+  /* ---------- Main ---------- */
+  main{flex:1; display:flex; flex-direction:column; min-width:0;}
+  .topbar{
+    height:56px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; border-bottom:1px solid var(--line);
+  }
+  .topbar .mode-title{font-size:14.5px; color:var(--muted);}
+  .topbar .mode-title b{color:var(--text);}
+  .menu-wrap{position:relative;}
+  .dots-btn{
+    background:none; border:1px solid var(--line); color:var(--text); border-radius:8px;
+    width:34px; height:34px; cursor:pointer; font-size:18px; line-height:1;
+  }
+  .dots-btn:hover{background:var(--panel);}
+  .dropdown{
+    position:absolute; right:0; top:42px; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding:10px; width:230px; display:none; z-index:20;
+    box-shadow:0 12px 30px rgba(0,0,0,0.4);
+  }
+  .dropdown.open{display:block;}
+  .dropdown .dlabel{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; padding:4px 8px 6px;}
+  .langgrid{display:grid; grid-template-columns:1fr 1fr; gap:4px; max-height:260px; overflow-y:auto;}
+  .langopt{padding:7px 8px; border-radius:7px; font-size:13px; cursor:pointer; color:var(--muted);}
+  .langopt:hover{background:var(--panel-2); color:var(--text);}
+  .langopt.active{background:rgba(232,179,76,0.15); color:var(--gold);}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:8px; font-size:13px; margin-top:6px; border-top:1px solid var(--line);}
+  .switch{width:36px; height:20px; background:var(--panel-2); border-radius:20px; position:relative; cursor:pointer; border:1px solid var(--line);}
+  .switch.on{background:rgba(232,179,76,0.3); border-color:var(--gold);}
+  .switch .knob{position:absolute; top:1px; left:1px; width:16px; height:16px; border-radius:50%; background:var(--muted); transition:.15s;}
+  .switch.on .knob{left:17px; background:var(--gold);}
+
+  /* ---------- Chat area ---------- */
+  .chat{flex:1; overflow-y:auto; padding:24px 0;}
+  .chat-inner{max-width:760px; margin:0 auto; padding:0 20px;}
+
+  .welcome{max-width:760px; margin:30px auto; padding:0 20px;}
+  .welcome h1{font-family:'Space Grotesk',sans-serif; font-size:26px; margin-bottom:8px;}
+  .welcome p{color:var(--muted); font-size:14px; line-height:1.7; margin-bottom:22px; max-width:600px;}
+  .feature-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .fcard{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px;
+    cursor:pointer; transition:border-color .15s, transform .1s;
+  }
+  .fcard:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .fcard .icon{font-size:20px; margin-bottom:8px;}
+  .fcard b{font-size:14px; display:block; margin-bottom:4px;}
+  .fcard small{font-size:12px; color:var(--muted); line-height:1.5;}
+
+  .msg{display:flex; gap:12px; margin-bottom:22px; align-items:flex-start;}
+  .msg.user{flex-direction:row-reverse;}
+  .avatar{width:30px; height:30px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px;}
+  .avatar.ai{background:var(--panel-2); border:1px solid var(--line);}
+  .avatar.user{background:var(--teal); color:#06231F; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+  .bubble{max-width:78%; padding:13px 16px; border-radius:14px; font-size:14.5px; line-height:1.75; white-space:pre-wrap;}
+  .msg.ai .bubble{background:var(--panel); border:1px solid var(--line); border-top-left-radius:4px;}
+  .msg.user .bubble{background:rgba(79,176,165,0.14); border:1px solid rgba(79,176,165,0.3); border-top-right-radius:4px;}
+  .bubble img{max-width:100%; border-radius:10px; margin-top:8px; display:block;}
+  .bubble .cap{font-size:12px; color:var(--muted); margin-top:6px;}
+  .msg-tools{display:flex; gap:8px; margin-top:8px;}
+  .msg-tools button{
+    background:none; border:1px solid var(--line); color:var(--muted); border-radius:6px;
+    padding:4px 8px; font-size:11px; cursor:pointer;
+  }
+  .msg-tools button:hover{color:var(--text); border-color:var(--gold);}
+  .typing-dots{display:inline-flex; gap:4px;}
+  .typing-dots span{width:6px; height:6px; border-radius:50%; background:var(--gold); animation:bounce 1s infinite;}
+  .typing-dots span:nth-child(2){animation-delay:.15s;}
+  .typing-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0); opacity:.4;}40%{transform:translateY(-5px); opacity:1;}}
+
+  /* ---------- Input bar ---------- */
+  .inputbar{border-top:1px solid var(--line); padding:16px 20px 20px; flex-shrink:0;}
+  .inputbox{
+    max-width:760px; margin:0 auto; display:flex; align-items:flex-end; gap:8px;
+    background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:8px 8px 8px 16px;
+  }
+  .inputbox:focus-within{border-color:var(--gold);}
+  textarea#userInput{
+    flex:1; background:none; border:none; outline:none; resize:none; color:var(--text);
+    font-family:inherit; font-size:14.5px; line-height:1.6; max-height:160px; padding:8px 0;
+  }
+  .icon-btn{
+    width:38px; height:38px; border-radius:11px; border:none; cursor:pointer; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .mic-btn{background:var(--panel-2); color:var(--muted); border:1px solid var(--line);}
+  .mic-btn.listening{background:rgba(227,123,107,0.2); color:var(--danger); border-color:var(--danger); animation:pulse 1s infinite;}
+  .send-btn{background:var(--gold); color:#1A1400;}
+  .send-btn:disabled{opacity:.5; cursor:not-allowed;}
+  .hint{max-width:760px; margin:8px auto 0; font-size:11px; color:var(--muted); text-align:center;}
+
+  @media (max-width:820px){
+    .sidebar{position:fixed; z-index:30; height:100vh; transform:translateX(-100%); transition:.2s;}
+    .sidebar.open{transform:translateX(0);}
+    .feature-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo" id="logoMark">
+        <svg viewBox="0 0 40 40" fill="none">
+          <circle class="ring" cx="20" cy="20" r="18" stroke="#262B42" stroke-width="1.3"/>
+          <path class="ring" d="M20 2a18 18 0 0 1 18 18" stroke="#E8B34C" stroke-width="1.3" stroke-linecap="round"/>
+          <path d="M20,10 C17,9 13.5,10 13,12.3 C10.3,12.3 9,14.7 10,16.5 C8.2,17.8 8.2,20.2 10,21.5 C9.3,23.9 11,25.9 13.2,25.6 C14.1,27.2 16.5,27.8 18,26.5 C18,27.2 20,28 20,28 C20,28 22,27.2 22,26.5 C23.5,27.8 25.9,27.2 26.8,25.6 C29,25.9 30.7,23.9 30,21.5 C31.8,20.2 31.8,17.8 30,16.5 C31,14.7 29.7,12.3 27,12.3 C26.5,10 23,9 20,10 Z" fill="#E8B34C" opacity="0.92"/>
+          <circle class="node" cx="15" cy="16" r="1.3" fill="#0B0D17"/>
+          <circle class="node" cx="25" cy="16" r="1.3" fill="#0B0D17"/>
+          <circle class="node" cx="15" cy="21" r="1.3" fill="#0B0D17"/>
+          <circle class="node" cx="25" cy="21" r="1.3" fill="#0B0D17"/>
+          <path d="M20,10 L20,28" stroke="#0B0D17" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Free<span>AI</span></div>
+        <div class="brand-tag">ভারতের জন্য, সম্পূর্ণ বিনামূল্যে</div>
+      </div>
+    </div>
+
+    <div class="newchat" id="newChatBtn">＋ &nbsp;নতুন চ্যাট</div>
+
+    <div class="section-label">ফিচার বেছে নিন</div>
+    <div class="modes" id="modes"></div>
+
+    <div class="india-note">🇮🇳 ভারতের সব রাজ্যের ভাষায় ব্যবহার করা যাবে — উপরের ⋮ মেনু থেকে ভাষা বদলান।</div>
+  </div>
+
+  <main>
+    <div class="topbar">
+      <div class="mode-title">মোড: <b id="modeTitle"></b></div>
+      <div class="menu-wrap">
+        <button class="dots-btn" id="dotsBtn">⋮</button>
+        <div class="dropdown" id="dropdown">
+          <div class="dlabel">উত্তরের ভাষা</div>
+          <div class="langgrid" id="langGrid"></div>
+          <div class="toggle-row">
+            <span>জোরে পড়ে শোনানো (Voice reply)</span>
+            <div class="switch" id="voiceToggle"><div class="knob"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat" id="chatArea">
+      <div class="welcome" id="welcome">
+        <h1>Free AI তে স্বাগতম 👋</h1>
+        <p>ভারতের সবার জন্য বিনামূল্যে এআই সহায়ক — নিচ থেকে একটা ফিচার বেছে নিন অথবা সরাসরি নিচে লিখে জিজ্ঞাসা করুন।</p>
+        <div class="feature-grid" id="featureGrid"></div>
+      </div>
+      <div class="chat-inner" id="chatInner"></div>
+    </div>
+
+    <div class="inputbar">
+      <div class="inputbox">
+        <textarea id="userInput" rows="1" placeholder="এখানে লিখুন..."></textarea>
+        <button class="icon-btn mic-btn" id="micBtn" title="ভয়েস দিয়ে বলুন">🎤</button>
+        <button class="icon-btn send-btn" id="sendBtn" title="পাঠান">➤</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const LANGS = [
+  {code:'bn', name:'বাংলা', speech:'bn-IN'},
+  {code:'en', name:'English', speech:'en-IN'},
+  {code:'hi', name:'हिन्दी', speech:'hi-IN'},
+  {code:'ta', name:'தமிழ்', speech:'ta-IN'},
+  {code:'te', name:'తెలుగు', speech:'te-IN'},
+  {code:'mr', name:'मराठी', speech:'mr-IN'},
+  {code:'gu', name:'ગુજરાતી', speech:'gu-IN'},
+  {code:'pa', name:'ਪੰਜਾਬੀ', speech:'pa-IN'},
+  {code:'kn', name:'ಕನ್ನಡ', speech:'kn-IN'},
+  {code:'ml', name:'മലയാളം', speech:'ml-IN'},
+  {code:'or', name:'ଓଡ଼ିଆ', speech:'or-IN'},
+  {code:'as', name:'অসমীয়া', speech:'as-IN'},
+  {code:'ur', name:'اردو', speech:'ur-IN'}
+];
+let currentLang = 'bn';
+let voiceReplyOn = false;
+
+const FEATURES = {
+  realtime: {
+    icon:'🔎', label:'রিয়েল-টাইম প্রশ্নোত্তর', short:'আজকের সঠিক তথ্য জেনে উত্তর',
+    placeholder:'যেমনঃ আজকে সেনসেক্স কত পয়েন্টে আছে?',
+    system:"You are a precise, up-to-date research assistant with web search access. Use web search to verify current facts before answering, especially dates, prices, current office-holders, and news. Answer directly and concisely, and note if things may change.",
+    useSearch:true
+  },
+  video: {
+    icon:'🎬', label:'স্ক্রিপ্ট টু ভিডিও', short:'টপিক দিলে ভিডিও স্ক্রিপ্ট',
+    placeholder:'যেমনঃ ৫টা স্মার্টফোন কেনার আগে যা জানা দরকার — ২ মিনিটের স্ক্রিপ্ট',
+    system:"You are a professional video scriptwriter. Given a topic, write a scene-by-scene short video script: scene numbers, on-screen visual direction, and narration/voiceover lines. Practical and ready to shoot.",
+    useSearch:false
+  },
+  photo: {
+    icon:'🖼️', label:'ফটো তৈরি', short:'লিখলে সত্যিকারের ছবি বানিয়ে দেবে',
+    placeholder:'যেমনঃ পুরনো ঢাকার রাতের রাস্তায় চা-ওয়ালার একটা সিনেমাটিক ছবি',
+    system:"Rewrite the user's idea into ONE vivid, literal, highly descriptive image-generation prompt in English (subject, setting, lighting, mood, style). Reply with ONLY the prompt text itself, nothing else, no preamble, under 50 words.",
+    useSearch:false, isImage:true
+  },
+  education: {
+    icon:'📚', label:'শিক্ষা সহায়ক', short:'যেকোনো বিষয় সহজে বোঝানো',
+    placeholder:'যেমনঃ নিউটনের তৃতীয় সূত্র সহজ উদাহরণ দিয়ে বোঝাও',
+    system:"You are a patient, clear teacher. Explain the topic or answer the question step by step in simple language with a concrete everyday example.",
+    useSearch:false
+  },
+  rnd: {
+    icon:'🔬', label:'রিসার্চ ও ডেভেলপমেন্ট', short:'রিসার্চ ব্রিফ ও দিকনির্দেশনা',
+    placeholder:'যেমনঃ গ্রামীণ এলাকায় কম খরচে বিশুদ্ধ পানির সমাধান নিয়ে গবেষণা দিকনির্দেশনা',
+    system:"You are a research analyst. Given a topic or problem, give a compact research brief: current state, key open questions, 3-4 promising directions, and next steps. Be concrete.",
+    useSearch:false
+  },
+  projects: {
+    icon:'🛠️', label:'প্রজেক্ট আইডিয়া', short:'স্কিল অনুযায়ী প্রজেক্ট প্ল্যান',
+    placeholder:'যেমনঃ বেসিক জাভাস্ক্রিপ্ট জানি, একটা প্রজেক্ট আইডিয়া দরকার',
+    system:"You are a project mentor. Given the user's interest or skill level, suggest one well-scoped project: what it does, why it fits their level, a step-by-step build plan, and tools to use.",
+    useSearch:false
+  }
+};
+
+let currentMode = 'realtime';
+const modesEl = document.getElementById('modes');
+const featureGridEl = document.getElementById('featureGrid');
+const langGridEl = document.getElementById('langGrid');
+
+function renderModes(){
+  modesEl.innerHTML='';
+  Object.keys(FEATURES).forEach(key=>{
+    const f = FEATURES[key];
+    const el = document.createElement('div');
+    el.className = 'mode' + (key===currentMode?' active':'');
+    el.innerHTML = `<div class="icon">${f.icon}</div><div class="txt"><b>${f.label}</b><small>${f.short}</small></div>`;
+    el.onclick = ()=>{ currentMode=key; renderModes(); updateTop(); };
+    modesEl.appendChild(el);
+  });
+}
+function renderFeatureGrid(){
+  featureGridEl.innerHTML='';
+  Object.keys(FEATURES).forEach(key=>{
+    const f = FEATURES[key];
+    const card = document.createElement('div');
+    card.className='fcard';
+    card.innerHTML = `<div class="icon">${f.icon}</div><b>${f.label}</b><small>${f.short}</small>`;
+    card.onclick = ()=>{ currentMode=key; renderModes(); updateTop(); document.getElementById('userInput').focus(); };
+    featureGridEl.appendChild(card);
+  });
+}
+function renderLangGrid(){
+  langGridEl.innerHTML='';
+  LANGS.forEach(l=>{
+    const el = document.createElement('div');
+    el.className = 'langopt' + (l.code===currentLang?' active':'');
+    el.textContent = l.name;
+    el.onclick = ()=>{ currentLang=l.code; renderLangGrid(); };
+    langGridEl.appendChild(el);
+  });
+}
+function updateTop(){
+  document.getElementById('modeTitle').textContent = FEATURES[currentMode].label;
+  document.getElementById('userInput').placeholder = FEATURES[currentMode].placeholder;
+  document.getElementById('hint').textContent =
+    currentMode==='photo' ? 'ছবি তৈরি হতে কয়েক সেকেন্ড সময় লাগতে পারে।' :
+    currentMode==='video' ? 'এটি স্ক্রিপ্ট আকারে দেয়, সরাসরি ভিডিও ফাইল বানায় না।' :
+    currentMode==='realtime' ? 'ওয়েব সার্চ থেকে যাচাই করে উত্তর দেওয়ার চেষ্টা করে, তবু গুরুত্বপূর্ণ তথ্য নিজে যাচাই করে নিন।' : '';
+}
+
+renderModes(); renderFeatureGrid(); renderLangGrid(); updateTop();
+
+document.getElementById('newChatBtn').onclick = ()=>{
+  document.getElementById('chatInner').innerHTML='';
+  document.getElementById('welcome').style.display='block';
+};
+
+// dropdown menu
+const dotsBtn = document.getElementById('dotsBtn');
+const dropdown = document.getElementById('dropdown');
+dotsBtn.onclick = (e)=>{ e.stopPropagation(); dropdown.classList.toggle('open'); };
+document.addEventListener('click', ()=> dropdown.classList.remove('open'));
+dropdown.onclick = (e)=> e.stopPropagation();
+
+const voiceToggle = document.getElementById('voiceToggle');
+voiceToggle.onclick = ()=>{ voiceReplyOn = !voiceReplyOn; voiceToggle.classList.toggle('on', voiceReplyOn); };
+
+// textarea autoresize
+const inputEl = document.getElementById('userInput');
+inputEl.addEventListener('input', ()=>{ inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,160)+'px'; });
+inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); } });
+document.getElementById('sendBtn').onclick = sendMessage;
+
+const chatInner = document.getElementById('chatInner');
+const welcome = document.getElementById('welcome');
+const logoMark = document.getElementById('logoMark');
+
+function addMessage(role, contentHtml){
+  welcome.style.display='none';
+  const msg = document.createElement('div');
+  msg.className = 'msg ' + role;
+  const avatar = role==='ai'
+    ? `<div class="avatar ai">🧠</div>`
+    : `<div class="avatar user">তু</div>`;
+  msg.innerHTML = `${avatar}<div class="bubble">${contentHtml}</div>`;
+  chatInner.appendChild(msg);
+  document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+  return msg.querySelector('.bubble');
+}
+
+function langName(code){ const l=LANGS.find(x=>x.code===code); return l? l.name : 'English'; }
+function speechTag(code){ const l=LANGS.find(x=>x.code===code); return l? l.speech : 'en-IN'; }
+
+async function callClaude(system, userText, useSearch){
+  const body = {
+    model:"claude-sonnet-4-6", max_tokens:1000,
+    system: system,
+    messages:[{role:"user", content:userText}]
+  };
+  if(useSearch) body.tools=[{type:"web_search_20250305", name:"web_search"}];
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)
+  });
+  const data = await res.json();
+  return (data.content||[]).map(b=>b.type==='text'?b.text:'').filter(Boolean).join('\n');
+}
+
+async function sendMessage(){
+  const text = inputEl.value.trim();
+  if(!text) return;
+  const f = FEATURES[currentMode];
+  addMessage('user', escapeHtml(text));
+  inputEl.value=''; inputEl.style.height='auto';
+  document.getElementById('sendBtn').disabled = true;
+  logoMark.classList.add('spin');
+
+  const bubble = addMessage('ai', '<span class="typing-dots"><span></span><span></span><span></span></span>');
+
+  try{
+    if(f.isImage){
+      const prompt = await callClaude(f.system, text, false);
+      const cleanPrompt = prompt.trim();
+      const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(cleanPrompt) + "?width=768&height=768&nologo=true&seed=" + Math.floor(Math.random()*100000);
+      bubble.innerHTML = `<div>ছবি তৈরি হচ্ছে...</div>`;
+      const img = new Image();
+      img.onload = ()=>{
+        bubble.innerHTML = `<img src="${url}" alt="generated"><div class="cap">প্রম্পট: ${escapeHtml(cleanPrompt)}</div>`;
+        document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
+      };
+      img.onerror = ()=>{ bubble.innerHTML = 'দুঃখিত, ছবি তৈরি করা যায়নি। আবার চেষ্টা করুন।'; };
+      img.src = url;
+    } else {
+      const langInstruction = `Respond in ${langName(currentLang)}.`;
+      const reply = await callClaude(f.system + ' ' + langInstruction, text, f.useSearch);
+      bubble.innerHTML = escapeHtml(reply).replace(/\n/g,'<br>');
+      addSpeakButton(bubble, reply);
+    }
+  }catch(err){
+    bubble.innerHTML = 'দুঃখিত, একটা সমস্যা হয়েছে। আবার চেষ্টা করুন। (' + err.message + ')';
+  }finally{
+    document.getElementById('sendBtn').disabled = false;
+    logoMark.classList.remove('spin');
+  }
+}
+
+function addSpeakButton(bubble, text){
+  if(!('speechSynthesis' in window)) return;
+  const tools = document.createElement('div');
+  tools.className='msg-tools';
+  const btn = document.createElement('button');
+  btn.textContent = '🔊 শুনুন';
+  btn.onclick = ()=>{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = speechTag(currentLang);
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  };
+  tools.appendChild(btn);
+  bubble.parentElement.appendChild(tools);
+  if(voiceReplyOn){ btn.click(); }
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Voice input
+const micBtn = document.getElementById('micBtn');
+let recognition = null;
+let listening = false;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(SR){
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onresult = (e)=>{
+    const transcript = e.results[0][0].transcript;
+    inputEl.value = transcript;
+    sendMessage();
+  };
+  recognition.onend = ()=>{ listening=false; micBtn.classList.remove('listening'); };
+  recognition.onerror = ()=>{ listening=false; micBtn.classList.remove('listening'); };
+  micBtn.onclick = ()=>{
+    if(listening){ recognition.stop(); return; }
+    recognition.lang = speechTag(currentLang);
+    recognition.start();
+    listening = true;
+    micBtn.classList.add('listening');
+  };
+}else{
+  micBtn.onclick = ()=> alert('এই ব্রাউজারে ভয়েস ইনপুট সাপোর্ট করে না। Chrome ব্যবহার করুন।');
+}
+</script>
+</body>
+</html>
